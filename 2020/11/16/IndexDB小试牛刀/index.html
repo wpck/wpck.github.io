@@ -1,0 +1,182 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>IndexDB小试牛刀 | 大瓶子</title><meta name="keywords" content="js, indexDB"><meta name="author" content="大瓶子"><meta name="copyright" content="大瓶子"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="IndexDB1.基本概念IndexBD里把不同的实体抽象成一个个对象接口,需要学习的是其中的对象接口;   数据库 - IDBDatabase 对象是一系列相关数据的存储容器,每个域名(协议+域名+端口)可以创建任意多个数据库;数据库有版本的概念,如果要修改数据库的结构(新增&#x2F;删除表,索引,主键),只能通过升级数据库版本来实现; 对象仓库 - IDBObjectStore 对象类似数据库里的表格">
+<meta property="og:type" content="article">
+<meta property="og:title" content="IndexDB小试牛刀">
+<meta property="og:url" content="http://example.com/2020/11/16/IndexDB%E5%B0%8F%E8%AF%95%E7%89%9B%E5%88%80/index.html">
+<meta property="og:site_name" content="大瓶子">
+<meta property="og:description" content="IndexDB1.基本概念IndexBD里把不同的实体抽象成一个个对象接口,需要学习的是其中的对象接口;   数据库 - IDBDatabase 对象是一系列相关数据的存储容器,每个域名(协议+域名+端口)可以创建任意多个数据库;数据库有版本的概念,如果要修改数据库的结构(新增&#x2F;删除表,索引,主键),只能通过升级数据库版本来实现; 对象仓库 - IDBObjectStore 对象类似数据库里的表格">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg">
+<meta property="article:published_time" content="2020-11-16T10:15:53.000Z">
+<meta property="article:modified_time" content="2020-11-17T07:42:08.414Z">
+<meta property="article:author" content="大瓶子">
+<meta property="article:tag" content="js, indexDB">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2020/11/16/IndexDB%E5%B0%8F%E8%AF%95%E7%89%9B%E5%88%80/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  ClickShowText: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2020-11-17 15:42:08'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+   if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }const asideStatus = saveToLocal.get('aside-status')
+if (asideStatus !== undefined) {
+   if (asideStatus === 'hide') {
+     document.documentElement.classList.add('hide-aside')
+   } else {
+     document.documentElement.classList.remove('hide-aside')
+   }
+}})()</script><meta name="generator" content="Hexo 5.2.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/img/avatar.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">5</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">1</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">大瓶子</a></span><span id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><h1 class="post-title">IndexDB小试牛刀</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-11-16T10:15:53.000Z" title="发表于 2020-11-16 18:15:53">2020-11-16</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-11-17T07:42:08.414Z" title="更新于 2020-11-17 15:42:08">2020-11-17</time></span></div><div class="meta-secondline"> </div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h3 id="IndexDB"><a href="#IndexDB" class="headerlink" title="IndexDB"></a>IndexDB</h3><h4 id="1-基本概念"><a href="#1-基本概念" class="headerlink" title="1.基本概念"></a>1.基本概念</h4><p>IndexBD里把不同的实体抽象成一个个对象接口,需要学习的是其中的对象接口;</p>
+<blockquote>
+<ul>
+<li>数据库 - IDBDatabase 对象<br>是一系列相关数据的存储容器,每个域名(协议+域名+端口)可以创建任意多个数据库;<br>数据库有版本的概念,如果要修改数据库的结构(新增/删除表,索引,主键),只能通过升级数据库版本来实现;</li>
+<li>对象仓库 - IDBObjectStore 对象<br>类似数据库里的表格概念,每个数据库可以包含若干个对象仓库;<br>对象仓库保存的是数据记录,是表格里的行,但其只有主键和数据体两部分;<br>主键用来建立默认索引,可以使数据记录里的一个属性也可以是递增的整数,必须是不同的值;数据体可以使任意数据类型;</li>
+<li>索引 - IDBIndex 对象<br>加速数据检索</li>
+<li>事务 - IDBTransaction 对象<br>数据的增删改查都要通过事务完成,事务对象提供 error, about, success 三个事件,用来监听操作结果;</li>
+<li>操作请求 - IDBRequest 对象</li>
+<li>指针 - IDBCursor 对象</li>
+<li>主键集合 - IDBKeyRange 对象</li>
+</ul>
+</blockquote>
+<h4 id="2-操作流程"><a href="#2-操作流程" class="headerlink" title="2.操作流程"></a>2.操作流程</h4><blockquote>
+<p>1.新建/打开数据库 .open(databaseName, [version]);<br>该方法返回 IDBRequest 对象,通过 error, success, upgradeneeded 三个事件处理打开数据库的操作请求;<br>若指定打开的数据库不存在,就会该数据库,并触发 upgradeneeded 事件;<br>新建数据库以后, 创建数据表即对象仓库;<br>新建对象仓库之后,新建索引</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">let db &#x3D; null;</span><br><span class="line">&#x2F;**------新建&#x2F;打开数据库-----------------------------------**&#x2F;</span><br><span class="line">let request &#x3D; window.indexedDB.open(&#39;testIDB&#39;);   &#x2F;&#x2F;打开数据库,若不存在即创建;</span><br><span class="line">request.onerror &#x3D; (event) &#x3D;&gt; &#123;</span><br><span class="line">    console.log(&#39;打开数据库失败&#39;);</span><br><span class="line">&#125;</span><br><span class="line">request.onsuccess &#x3D; (event) &#x3D;&gt; &#123;</span><br><span class="line">    db &#x3D; request.result;     &#x2F;&#x2F;通过result获取数据库对象</span><br><span class="line">    console.log(&#39;打开数据库成功&#39;);</span><br><span class="line">&#125;</span><br><span class="line">request.onupgradeneeded &#x3D; (event) &#x3D;&gt;&#123;</span><br><span class="line">    &#x2F;&#x2F;若指定版本号大于数据库实际版本号,会触发该事件</span><br><span class="line">    db &#x3D; event.target.result;    &#x2F;&#x2F;通过target.result属性拿到数据库对象;</span><br><span class="line">    let person &#x3D; db.createObjectStore(&#39;person&#39;, &#123;autoIncrement: true&#125;);  &#x2F;&#x2F; 主键递增的表</span><br><span class="line">    let objectStore &#x3D; db.createObjectStore(&#39;testTable&#39;, &#123;keyPath: id&#125;);   &#x2F;&#x2F;主键为id的表</span><br><span class="line">    person.createIndex(&#39;name&#39;, &#39;name&#39;, &#123;unique: false&#125;)    &#x2F;&#x2F;创建索引</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<ol start="2">
+<li>增查删改数据 add / get / delete / put<br>增查删改改变对象仓库的操作,需要通过事务对象 (IDBTransaction) 完成<br>add / get / delete / put 方法返回一个连接对象,通过监听该对象的 error, success 事件判断操作数据的结果;</li>
+</ol>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">let oprtDate &#x3D; (type) &#x3D;&gt; &#123;</span><br><span class="line">    let person_transaction &#x3D; db.transaction([&#39;person&#39;], &#39;readwrite&#39;);    &#x2F;&#x2F;创建事务对象,指定表格名称和操作类型</span><br><span class="line">    let person_os &#x3D; person_transaction.objectStore(&#39;person&#39;);   &#x2F;&#x2F;获取到对象仓库对象</span><br><span class="line">    let add_request;</span><br><span class="line">    let oprt_request;</span><br><span class="line">    switch(type) &#123;</span><br><span class="line">        case &#39;add&#39;:   &#x2F;&#x2F;新增数据</span><br><span class="line">            oprt_request &#x3D; person_os.add(&#123;id: 1, name: &#39;name1&#39;, age: &#39;age1&#39;&#125;);</span><br><span class="line">            break;</span><br><span class="line">        case &#39;get&#39;:  &#x2F;&#x2F;获取主键为1的数据</span><br><span class="line">            oprt_request &#x3D; person_os.get(1); </span><br><span class="line">            break;</span><br><span class="line">        case &#39;put&#39;:    &#x2F;&#x2F;修改主键为1的数据</span><br><span class="line">            oprt_request &#x3D; person_os.put(&#123;id: 1, name: &#39;real11&#39;, age: 11&#125;);</span><br><span class="line">             break;</span><br><span class="line">        case &#39;delete&#39;:   &#x2F;&#x2F;删除主键为1的数据</span><br><span class="line">            oprt_request &#x3D; person_os.delete(1);</span><br><span class="line">            break;</span><br><span class="line">    &#125;</span><br><span class="line">    oprt_request.onerror &#x3D; () &#x3D;&gt; &#123;   &#x2F;&#x2F;操作失败</span><br><span class="line">        console.log(type + &#39;失败&#39;);</span><br><span class="line">    &#125;</span><br><span class="line">    oprt_request.onsuccess &#x3D; () &#x3D;&gt; &#123;   &#x2F;&#x2F;操作成功</span><br><span class="line">        console.log(&#39;写入数据成功&#39;);</span><br><span class="line">        if (type &#x3D;&#x3D;&#x3D; &#39;get&#39;) &#123;</span><br><span class="line">            console.log(oprt_request.result);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<ol start="3">
+<li>遍历数据<br>遍历表格的所有数据,同样需要在事务对象上完成, 并使用指针对象 IDBCursor 的 openCursor 方法, 需要监听其 success 事件</li>
+</ol>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">let readAll &#x3D; () &#x3D;&gt; &#123;</span><br><span class="line">        let transaction &#x3D; db.transaction([&#39;person&#39;], &#39;readwrite&#39;);</span><br><span class="line">        let person_os &#x3D; transaction.objectStore(&#39;person&#39;);</span><br><span class="line">        let readall_req &#x3D; person_os.openCursor();    &#x2F;&#x2F;创建指针</span><br><span class="line">        readall_req.onsuccess &#x3D; (event) &#x3D;&gt; &#123;</span><br><span class="line">            let cursor &#x3D; event.target.result;</span><br><span class="line">            if (cursor) &#123;</span><br><span class="line">                console.log(cursor.key);</span><br><span class="line">                console.log(cursor.value);</span><br><span class="line">                cursor.continue();</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                console.log(&#39;读取完毕&#39;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<ol start="4">
+<li>使用索引<br>默认情况下只能使用主键进行搜索, 建立索引,可以搜索任意字段;<br>首先,新建表格(即仓库对象)的时候对某个字段建立索引, 在获取数据记录时,就可以使用该字段为索引,进行搜索;   </li>
+</ol>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;在创建表格是对name字段建立了索引</span><br><span class="line">person.createIndex(&#39;name&#39;, &#39;name&#39;, &#123;unique: false&#125;);</span><br><span class="line">let name_index &#x3D; person_os.index(&#39;name&#39;);</span><br><span class="line">let get_request &#x3D; name_index.get(&#39;name1&#39;)   &#x2F;&#x2F;获取name值为name1的数据记录</span><br></pre></td></tr></table></figure>
+<p>以上文章参考<a target="_blank" rel="noopener" href="http://www.ruanyifeng.com/blog/2018/07/indexeddb.html">阮一峰indexDB入门教程</a>,跟着写了一遍操作的代码;</p>
+</article><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/js-indexDB/">js, indexDB</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2020/11/16/%E9%A1%B9%E7%9B%AE%E4%B8%AD%E7%94%A8%E5%88%B0%E7%9A%84ES6%E8%AF%AD%E6%B3%95/"><img class="next-cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">项目中用到的ES6语法</div></div></a></div></nav></div><div class="aside_content" id="aside_content"><div class="card-widget card-info"><div class="card-content"><div class="card-info-avatar is-center"><img class="avatar-img" src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">大瓶子</div><div class="author-info__description">哈哈哈哈</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">5</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">1</div></a></div></div><a class="button--animated" id="card-info-btn"><i></i><span></span></a></div></div><div class="card-widget card-announcement"><div class="card-content"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">学无止境</div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="card-content"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#IndexDB"><span class="toc-number">1.</span> <span class="toc-text">IndexDB</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-number">1.1.</span> <span class="toc-text">1.基本概念</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E6%93%8D%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="toc-number">1.2.</span> <span class="toc-text">2.操作流程</span></a></li></ol></li></ol></div></div></div><div class="card-widget card-recent-post"><div class="card-content"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2020/11/16/IndexDB%E5%B0%8F%E8%AF%95%E7%89%9B%E5%88%80/" title="IndexDB小试牛刀"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="IndexDB小试牛刀"/></a><div class="content"><a class="title" href="/2020/11/16/IndexDB%E5%B0%8F%E8%AF%95%E7%89%9B%E5%88%80/" title="IndexDB小试牛刀">IndexDB小试牛刀</a><time datetime="2020-11-16T10:15:53.000Z" title="发表于 2020-11-16 18:15:53">2020-11-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/11/16/%E9%A1%B9%E7%9B%AE%E4%B8%AD%E7%94%A8%E5%88%B0%E7%9A%84ES6%E8%AF%AD%E6%B3%95/" title="项目中用到的ES6语法"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="项目中用到的ES6语法"/></a><div class="content"><a class="title" href="/2020/11/16/%E9%A1%B9%E7%9B%AE%E4%B8%AD%E7%94%A8%E5%88%B0%E7%9A%84ES6%E8%AF%AD%E6%B3%95/" title="项目中用到的ES6语法">项目中用到的ES6语法</a><time datetime="2020-11-16T08:20:21.000Z" title="发表于 2020-11-16 16:20:21">2020-11-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/10/11/%E9%A1%B9%E7%9B%AE%E5%8D%87%E7%BA%A7%E9%87%8D%E6%9E%84%E8%AE%B0%E5%BD%95-react-antd/" title="项目升级重构记录(react,antd)"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="项目升级重构记录(react,antd)"/></a><div class="content"><a class="title" href="/2020/10/11/%E9%A1%B9%E7%9B%AE%E5%8D%87%E7%BA%A7%E9%87%8D%E6%9E%84%E8%AE%B0%E5%BD%95-react-antd/" title="项目升级重构记录(react,antd)">项目升级重构记录(react,antd)</a><time datetime="2020-10-11T08:49:34.000Z" title="发表于 2020-10-11 16:49:34">2020-10-11</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2019/11/17/butterfly%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/" title="butterfly主题配置"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="butterfly主题配置"/></a><div class="content"><a class="title" href="/2019/11/17/butterfly%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/" title="butterfly主题配置">butterfly主题配置</a><time datetime="2019-11-17T07:18:40.000Z" title="发表于 2019-11-17 15:18:40">2019-11-17</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2019/11/16/%E9%87%8D%E5%90%AF%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2-hexo-github/" title="重启个人博客(hexo+github)"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="重启个人博客(hexo+github)"/></a><div class="content"><a class="title" href="/2019/11/16/%E9%87%8D%E5%90%AF%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2-hexo-github/" title="重启个人博客(hexo+github)">重启个人博客(hexo+github)</a><time datetime="2019-11-16T06:26:40.000Z" title="发表于 2019-11-16 14:26:40">2019-11-16</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2019 - 2020 By 大瓶子</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="footer_custom_text">Welcome, let's get better than yesterday!</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><div class="js-pjax"></div></div></body></html>
